@@ -12,17 +12,18 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         # see https://github.com/nix-community/poetry2nix/tree/master#api for more functions and examples.
-        inherit (poetry2nix.legacyPackages.${system}) mkPoetryApplication;
+        inherit (poetry2nix.legacyPackages.${system}) mkPoetryEnv;
         pkgs = nixpkgs.legacyPackages.${system};
+        pythonEnv = mkPoetryEnv {
+          projectDir = self;
+        };
       in
       {
-        packages = {
-          myapp = mkPoetryApplication { projectDir = self; };
-          default = self.packages.${system}.myapp;
-        };
-
         devShells.default = pkgs.mkShell {
-          packages = [ poetry2nix.packages.${system}.poetry ];
+          packages = [ 
+            poetry2nix.packages.${system}.poetry 
+            pythonEnv
+          ];
         };
       });
 }
